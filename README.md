@@ -28,3 +28,5 @@
 - Redirection req per second = 770
 - Redirection req per day = 770\*24\*60\*60 = 66.528M
 - Total size =  66.528 × 10^6\*500/(1000\*1024*1024) = ~31GB
+- Assuming that we will cache only 20% of the request, so total memory requirements = 6.1GB
+
