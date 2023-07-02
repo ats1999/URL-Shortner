@@ -30,3 +30,10 @@
 - Total size =  66.528 × 10^6\*500/(1000\*1024*1024) = ~31GB
 - Assuming that we will cache only 20% of the request, so total memory requirements = 6.1GB
 
+## System Design
+![system-design-url](https://raw.githubusercontent.com/ats1999/URL-Shortner/main/url-shortner.drawio.svg)
+
+System design is pretty simple, there will be a cluster of servers sitting behind load balancer. 
+Since, single server can not handle all the load and single server is single point of failure. 
+
+Initially, url and it's metadata will be saved in SQL database and then redirection request will be served from redis cache.
