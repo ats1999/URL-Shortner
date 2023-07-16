@@ -1,8 +1,8 @@
 package com.dsabyte.urlshortner.url;
 
 import com.dsabyte.urlshortner.services.SortCodeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -12,15 +12,22 @@ import java.util.Objects;
 
 @Service
 public class UrlService {
-    @Autowired
-    Environment environment;
     UrlRepository urlRepository;
+    StringRedisTemplate stringRedisTemplate;
+    Environment environment;
 
-    UrlService(UrlRepository urlRepository) {
+    UrlService(
+            UrlRepository urlRepository,
+            Environment environment,
+            StringRedisTemplate stringRedisTemplate
+    ) {
         this.urlRepository = urlRepository;
+        this.environment = environment;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     public String sortUrl(UrlSortPayloadDTO urlSortPayloadDTO) {
+        // TODO: make sure that duplicates URLs does not exists in DB
         UrlModel urlModel = new UrlModel();
         urlModel.setUrl(urlSortPayloadDTO.url());
         urlModel.setSortCode(SortCodeService.getSortCode());
@@ -43,14 +50,28 @@ public class UrlService {
     }
 
     public String getLongUrl(String sortCode) {
+        String longUrl = stringRedisTemplate
+                .opsForValue()
+                .get(sortCode);
+
+        if(longUrl != null){
+            return longUrl;
+        }
+
         UrlModel urlModel = urlRepository.findBySortCode(sortCode);
 
-        return urlModel != null
-                ? urlModel.getUrl()
-                : null;
+        if(urlModel == null){
+            return null;
+        }
+
+        stringRedisTemplate
+                .opsForValue()
+                .set(sortCode,urlModel.getUrl());
+
+        return urlModel.getUrl();
     }
 
-    public List<UrlModel> getAllUrls(){
+    public List<UrlModel> getAllUrls() {
         return urlRepository.findAll();
     }
 }
