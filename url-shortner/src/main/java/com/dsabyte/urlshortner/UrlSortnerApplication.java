@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 public class UrlSortnerApplication {
 
 	public static void main(String[] args) {
-		System.out.println("Hello");
 		SpringApplication.run(UrlSortnerApplication.class, args);
 	}
 
