@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+            src="https://platform.linkedin.com/badges/js/profile.js"
+            async
+            defer
+            type="text/javascript"
+    ></script>
+    <script src="index.js"></script>
+    <title>A URL Shortener</title>
+</head>
+<body>
+<h1 class="text-primary text-center h1">A URL Shortener</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div class="p-1 container">
+                <div class="mb-3 mt-3">
+                    <label for="url-input" class="form-label h5"
+                    >Paste the URL to be shortened..</label
+                    >
+                    <input
+                            type="url"
+                            class="form-control p-3"
+                            id="url-input"
+                            placeholder="Enter url.."
+                            name="url"
+                    />
+                </div>
+                <button class="btn btn-primary w-100" onclick="handleSubmit()">
+                    Sort URL
+                </button>
+            </div>
+        </div>
+        <div class="col-4">
+            <h5>Shortened URLs</h5>
+            <ul id="sort-url-list" class="list-group h-50 overflow-auto"></ul>
+        </div>
+        <div class="col-4">
+            <div class="container">
+                <div
+                        class="badge-base LI-profile-badge mb-2"
+                        data-locale="en_US"
+                        data-size="large"
+                        data-theme="light"
+                        data-type="HORIZONTAL"
+                        data-vanity="rahul-kumar-🇮🇳-36b05a189"
+                        data-version="v1"
+                ></div>
+            </div>
+
+            <h3 class="text-center"><a class="text-center" target="_blank" href="https://github.com/ats1999/URL-Shortner"
+            >View Source Code</a
+            ></h3>
+        </div>
+    </div>
+</div>
+</body>
+</html>
