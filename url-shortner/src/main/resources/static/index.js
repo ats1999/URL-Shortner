@@ -24,7 +24,7 @@ function handleSubmit(e) {
       urlEntry.className = "list-group-item";
       urlEntry.setAttribute("href", `${location.origin}/${sortCode}`);
       urlEntry.setAttribute("target", "_blank");
-      urlEntry.innerHTML = `${sortCode} <span style="float:right;" class="badge bg-danger" id="new-url-badge">new</span>`;
+      urlEntry.innerHTML = `${location.origin}/${sortCode} <span style="float:right;" class="badge bg-danger" id="new-url-badge">new</span>`;
       sortUrlListContainer.prepend(urlEntry);
     })
     .catch(alert);
@@ -47,7 +47,7 @@ function handleSubmit(e) {
         urlEntry.className = "list-group-item";
         urlEntry.setAttribute("href", `${location.origin}/${url.sortCode}`);
         urlEntry.setAttribute("target", "_blank");
-        urlEntry.innerText = url.sortCode;
+        urlEntry.innerText = `${location.origin}/${url.sortCode}`;
         sortUrlListContainer.append(urlEntry);
       });
     })
