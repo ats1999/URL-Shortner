@@ -1,6 +1,8 @@
 package com.dsabyte.urlshortner.url;
 
 import com.dsabyte.urlshortner.services.SortCodeService;
+import com.dsabyte.urlshortner.services.ZooCurator;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -26,8 +28,75 @@ public class UrlService {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
-    public String sortUrl(UrlSortPayloadDTO urlSortPayloadDTO) {
-        // TODO: make sure that duplicates URLs does not exists in DB
+    public String sortUrl(UrlSortPayloadDTO urlSortPayloadDTO) throws Exception {
+        UrlModel existingUrl = getUrl(urlSortPayloadDTO.url());
+
+        if (existingUrl != null) {
+            return existingUrl.getSortCode();
+        }
+
+        boolean encodePathToBase64 = true;
+        InterProcessMutex lock = ZooCurator
+                .getLock(
+                        urlSortPayloadDTO.url(),
+                        encodePathToBase64
+                );
+
+        try {
+            lock.acquire();
+
+            // it's possible that url might have been stored by some other client
+            // we need to double-check in-order to ensure that no duplicate urls present in DB
+            UrlModel url = getUrl(urlSortPayloadDTO.url());
+
+            return Objects
+                    .requireNonNullElseGet(url, () -> {
+                        try {
+                            return saveUrl(urlSortPayloadDTO);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .getSortCode();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        } finally {
+            lock.release();
+        }
+    }
+
+    public String getLongUrl(String sortCode) {
+        String longUrl = stringRedisTemplate
+                .opsForValue()
+                .get(sortCode);
+
+        if (longUrl != null) {
+            return longUrl;
+        }
+
+        UrlModel urlModel = urlRepository.findBySortCode(sortCode);
+
+        if (urlModel == null) {
+            return null;
+        }
+
+        stringRedisTemplate
+                .opsForValue()
+                .set(sortCode, urlModel.getUrl());
+
+        return urlModel.getUrl();
+    }
+
+    public List<UrlModel> getAllUrls() {
+        return urlRepository.findAll();
+    }
+
+    private UrlModel getUrl(String longUrl) {
+        return urlRepository
+                .findByUrl(longUrl);
+    }
+
+    private UrlModel saveUrl(UrlSortPayloadDTO urlSortPayloadDTO) throws Exception {
         UrlModel urlModel = new UrlModel();
         urlModel.setUrl(urlSortPayloadDTO.url());
         urlModel.setSortCode(SortCodeService.getSortCode());
@@ -46,32 +115,6 @@ public class UrlService {
         urlModel.setExpiryDate(calendar.getTime().getTime());
 
         urlRepository.insert(urlModel);
-        return urlModel.getSortCode();
-    }
-
-    public String getLongUrl(String sortCode) {
-        String longUrl = stringRedisTemplate
-                .opsForValue()
-                .get(sortCode);
-
-        if(longUrl != null){
-            return longUrl;
-        }
-
-        UrlModel urlModel = urlRepository.findBySortCode(sortCode);
-
-        if(urlModel == null){
-            return null;
-        }
-
-        stringRedisTemplate
-                .opsForValue()
-                .set(sortCode,urlModel.getUrl());
-
-        return urlModel.getUrl();
-    }
-
-    public List<UrlModel> getAllUrls() {
-        return urlRepository.findAll();
+        return urlModel;
     }
 }

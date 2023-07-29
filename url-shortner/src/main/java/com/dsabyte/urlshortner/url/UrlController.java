@@ -24,7 +24,7 @@ public class UrlController {
     }
 
     @PostMapping("/url/sort")
-    public SortCodeDTO sortUrl(@RequestBody @Valid UrlSortPayloadDTO urlSortPayloadDTO) {
+    public SortCodeDTO sortUrl(@RequestBody @Valid UrlSortPayloadDTO urlSortPayloadDTO) throws Exception {
         String sortCode = urlService.sortUrl(urlSortPayloadDTO);
         return new SortCodeDTO(urlSortPayloadDTO.url(), sortCode);
     }
